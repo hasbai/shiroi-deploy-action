@@ -5,8 +5,8 @@ WORKDIR /app
 RUN npm install -g --arch=x64 --platform=linux sharp
 
 COPY public .
-COPY .next/standalone ./
-COPY .next/static .next/static
+COPY ./.next/standalone ./
+COPY ./.next/static .next/static
 
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
