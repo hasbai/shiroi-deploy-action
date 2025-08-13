@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  workflow_dispatch:
+permissions: write-all
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build artifact
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [lts/*]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: innei-dev/shiroi
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 0
+          lfs: true
+      - name: Checkout LFS objects
+        run: git lfs checkout
+      - uses: pnpm/action-setup@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+      - uses: jongwooo/next-cache@v1
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build project
+        run: |
+          sh ./ci-release-build.sh
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: assets/release.zip
